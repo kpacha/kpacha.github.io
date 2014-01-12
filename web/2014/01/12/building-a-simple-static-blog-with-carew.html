@@ -66,22 +66,30 @@
     <div class="body">
       <p>I think the better topic for a first post must be 'how did I build this?', so here we go!</p>
 
-<p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. The repo has two branches:</p>
+<p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. I know the <a href="http://carew.github.io/cookbook/hosting.html">cookbook</a> recomends an easier way, but I don't want the carew installation on my <code>master</code> branch so, my repo has two branches:</p>
 
-<ul><li>The 'master' branch stores the last static website builded as it's intended to serve the web contents for github pages</li>
-<li>The 'editor' branch stores the carew project and all the markdown pages</li>
+<ul><li>The <code>master</code> branch stores the last static website builded as it's intended to serve the web contents for github pages</li>
+<li>The <code>editor</code> branch stores the carew project and all the markdown pages</li>
 </ul><p>So the workflow I'm following here is quite simple:</p>
 
-<ul><li>checkout the 'editor' branch</li>
+<ul><li>checkout the <code>editor</code> branch</li>
 <li>create new post</li>
 <li>re-build website</li>
 <li>commit changes</li>
-<li>merge the new website to master</li>
+<li>merge the new website to <code>master</code></li>
 <li>commit changes</li>
 <li>push both branches</li>
-</ul><h2 id="editor-branch">Editor branch<a href="#editor-branch" class="anchor">#</a></h2>
+</ul><h2 id="initial-setup">Initial setup<a href="#initial-setup" class="anchor">#</a></h2>
 
-<p>Create your editor branch just typing</p>
+<p>Create a new github repo named <code>&lt;YOUR-GITHUB-USER&gt;.github.io</code> and clone it somewhere in your system</p>
+
+<pre><code>$ git clone https://github.com/&lt;YOUR-GITHUB-USER&gt;/&lt;YOUR-GITHUB-USER&gt;.github.io.git
+$ cd &lt;YOUR-GITHUB-USER&gt;.github.io
+</code></pre>
+
+<h2 id="editor-branch">Editor branch<a href="#editor-branch" class="anchor">#</a></h2>
+
+<p>Create your <code>editor</code> branch just typing</p>
 
 <pre><code>$ git checkout -b editor
 </code></pre>
@@ -94,21 +102,21 @@
 $ bin/carew build
 </code></pre>
 
-<p>That's all, you can browse the web/ directory.</p>
+<p>That's all, you can browse the <code>web/</code> directory.</p>
 
-<p>Now you must edit the confi.yml and the post and pages folder contents.</p>
+<p>Now you must edit the <code>confi.yml</code> and the <code>posts/</code> and <code>pages/</code> folder contents.</p>
 
 <h3 id="git-integration">Git integration<a href="#git-integration" class="anchor">#</a></h3>
 
-<p>Once your editor branch has a carew project working, it's time to integrate it in your workflow. It could be done just by adding two more files to the editor branch: '.gitignore' and 'install'.</p>
+<p>Once your <code>editor</code> branch has a carew project working, it's time to integrate it in your workflow. It could be done just by adding two more files to the <code>editor</code> branch: <code>.gitignore</code> and <code>install</code>.</p>
 
-<p>.gitignore will prevent you from adding the bin and vendor folders</p>
+<p><code>.gitignore</code> will prevent you from adding the <code>bin/</code> and <code>vendor/</code> folders</p>
 
 <pre><code>/vendor/
 /bin/
 </code></pre>
 
-<p>install will be usefull when you want to install your 'editor' environment after a 'git clone'</p>
+<p>Also, <code>install</code> will be usefull when you want to install your <code>editor</code> environment after a <code>git clone</code></p>
 
 <pre><code>#!/bin/bash
 composer install -o
@@ -122,7 +130,7 @@ bin/carew build
 
 <p>Now you can add the root folder into git.</p>
 
-<p>In future checkouts from scratch, you will need to run the install script before be ready to work!</p>
+<p>In future checkouts from scratch, you will need to run the <code>install</code> script before be ready to work!</p>
 
 <pre><code>$ git clone https://github.com/kpacha/kpacha.github.io.git
 $ git checkout editor
@@ -131,17 +139,17 @@ $ ./install
 
 <h2 id="master-branch">Master branch<a href="#master-branch" class="anchor">#</a></h2>
 
-<p>Checkout your master branch</p>
+<p>Checkout your <code>master</code> branch</p>
 
 <pre><code>$ git checkout master
 </code></pre>
 
-<p>And add the .gitignore file from the editor branch</p>
+<p>And add the <code>.gitignore</code> file from the <code>editor</code> branch</p>
 
 <pre><code>$ git checkout editor -- .gitignore
 </code></pre>
 
-<p>Create a file called update.sh</p>
+<p>Create a file called <code>update.sh</code></p>
 
 <pre><code>#!/bin/bash
 git checkout editor -- web
@@ -151,18 +159,18 @@ git reset HEAD web
 git status
 </code></pre>
 
-<p>After adding the execution permissions to update.sh, add them to git</p>
+<p>After adding the execution permissions to <code>update.sh</code>, add them to git</p>
 
 <pre><code>$ chmod +x update.sh
 $ git add .gitignore update.sh
 $ git commit -m "set up the master branch"
 </code></pre>
 
-<p>Now, every time you want to push your generated statics you must run the update.sh script, add the untracked files listed, commit them and push the branch to github</p>
+<p>Now, every time you want to push your generated statics you must run the <code>update.sh</code> script, add the untracked files listed, commit them and push the branch to github</p>
 
 <h2 id="posting">Posting<a href="#posting" class="anchor">#</a></h2>
 
-<p>From the editor branch, create your post entry</p>
+<p>From the <code>editor</code> branch, create your post entry</p>
 
 <pre><code>$ bin/carew generate:post "New post title"
 </code></pre>
@@ -172,7 +180,7 @@ $ git commit -m "set up the master branch"
 <pre><code>$ bin/carew build
 </code></pre>
 
-<p>Now it's time to commit your changes into your editor branch and update your master one. Just type</p>
+<p>Now it's time to commit your changes into your <code>editor</code> branch and update your <code>master</code> one. Just type</p>
 
 <pre><code>$ git add .
 $ git commit -m "adding the 'New post title'"
