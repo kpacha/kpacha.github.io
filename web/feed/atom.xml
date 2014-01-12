@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>kpacha</title>
+    <subtitle>Hacking around</subtitle>
+    <link href="http://kpacha.github.io/feed/index.atom" rel="self" />
+    <link href="http://kpacha.github.io/" />
+        <id>http://kpacha.github.io/</id>
+            <updated>2014-01-12T00:00:00+01:00</updated>
+            <entry>
+        <title>Building a simple static blog with carew</title>
+                <id>http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html</id>
+                <updated>2014-01-12T00:00:00+01:00</updated>
+        <author>
+            <name>kpacha</name>
+            <email>kpacha666@gmail.com</email>
+        </author>
+        <link rel="alternate" type="text/html" href="http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html"/>
+        <content type="html" xml:lang="en"><![CDATA[<p>I think the better topic for a first post must be 'how did I build this?', so here we go!</p>
+
+<p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. The repo has two branches:</p>
+
+<ul><li>The 'master' branch stores the last static website builded as it's intended to serve the web contents for github pages</li>
+<li>The 'editor' branch stores the carew project and all the markdown pages</li>
+</ul><p>So the workflow I'm following here is quite simple:</p>
+
+<ul><li>checkout the 'editor' branch</li>
+<li>create new post</li>
+<li>commit changes</li>
+<li>re-build website</li>
+<li>merge the new website to master</li>
+<li>commit changes</li>
+<li>push both branches</li>
+</ul><h2 id="installation">Installation<a href="#installation" class="anchor">#</a></h2>
+
+<p>The best way to start with carew is to use the carew boilerplate: You will need composer.</p>
+
+<pre><code>$ php composer.phar create-project carew/boilerplate my_website -s dev
+$ cd my_website
+$ bin/carew build
+</code></pre>
+
+<p>That's all, you can browse the web/ directory.</p>
+
+<h2 id="posting">Posting<a href="#posting" class="anchor">#</a></h2>
+
+<p>Create your post entry</p>
+
+<pre><code>$ bin/carew generate:post "Your post title"
+</code></pre>
+
+<p>Edit your entry and rebuild your web</p>
+
+<pre><code>$ bin/carew build
+</code></pre>]]></content>
+    </entry>
+    </feed>
