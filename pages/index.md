@@ -1,11 +1,12 @@
 ---
-title: Blog
+title: Blogging
 subtitle: for fun and profit
-navigations: main
 ---
 
-## Posts
+{{ render_document(carew.posts|last) }}
 
-{{ render_documents(paginate(carew.posts|reverse)) }}
+{% if carew.posts|slice(0, -1) %}
+	## Older blog posts
 
-Or you can {{ link('tags', 'browse all tags') }}.
+	{{ render_documents(paginate(carew.posts|reverse|slice(1))) }}
+{% endif %}

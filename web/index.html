@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Blog</title>
+    <title>Blogging</title>
 
     <meta name="description" content="Hacking around">
     <meta name="author" content="kpacha">
@@ -39,7 +39,7 @@
                   <div class="nav-collapse collapse">
                     <ul class="nav">
                                                                                                             <li><a href="about.html">About me</a></li>
-                                                            <li class="active"><a href="index.html">Blog</a></li>
+                                                            <li><a href="archive.html">Archive</a></li>
                                                             <li><a href="contributions.html">Contributions</a></li>
                                                                                                 </ul>
                                       </div>
@@ -54,18 +54,149 @@
                   <div class="row">
             <div class="span10 offset1 content">
                                                 <div class="page-header">
-                    <h1>Blog <small>for fun and profit</small></h1>
+                    <h1>Blogging <small>for fun and profit</small></h1>
                   </div>
                               
-              <h2 id="posts">Posts<a href="#posts" class="anchor">#</a></h2>
+              <p>    <h2>
+        <a href="2014/01/12/building-a-simple-static-blog-with-carew.html">
+            Building a simple static blog with carew
+        </a>
+        <small>
+            Jan 12
+                    </small>
+    </h2>
+    <p>I think the best topic for a first post must be 'how did I build this?', so here we go!</p>
 
-<p><ul class="unstyled" style="padding-left:30px"><li class=""><h5><a href="2014/01/12/building-a-simple-static-blog-with-carew.html"><i class="icon-book"></i>
-                                Building a simple static blog with carew
-                                <small>(2014-01-12)</small></a></h5></li></ul></p>
+<p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. I know the <a href="http://carew.github.io/cookbook/hosting.html">cookbook</a> recomends an easier way, but I don't want the carew installation on my <code>master</code> branch so, my repo has two branches:</p>
 
-<p>Or you can <a href="tags/index.html">
-        browse all tags
-    </a>.</p>            </div>
+<ul><li>The <code>master</code> branch stores the last static website builded as it's intended to serve the web contents for github pages</li>
+<li>The <code>editor</code> branch stores the carew project and all the markdown pages</li>
+</ul><p>So the workflow I'm following here is quite simple:</p>
+
+<ul><li>checkout the <code>editor</code> branch</li>
+<li>create new post</li>
+<li>re-build website</li>
+<li>commit changes</li>
+<li>merge the new website to <code>master</code></li>
+<li>commit changes</li>
+<li>push both branches</li>
+</ul><h2 id="initial-setup">Initial setup<a href="#initial-setup" class="anchor">#</a></h2>
+
+<p>Create a new github repo named <code>&lt;YOUR-GITHUB-USER&gt;.github.io</code> and clone it somewhere in your system</p>
+
+<pre><code>$ git clone https://github.com/&lt;YOUR-GITHUB-USER&gt;/&lt;YOUR-GITHUB-USER&gt;.github.io.git
+$ cd &lt;YOUR-GITHUB-USER&gt;.github.io
+</code></pre>
+
+<h2 id="editor-branch">Editor branch<a href="#editor-branch" class="anchor">#</a></h2>
+
+<p>Create your <code>editor</code> branch just typing</p>
+
+<pre><code>$ git checkout -b editor
+</code></pre>
+
+<h3 id="carew-installation">Carew Installation<a href="#carew-installation" class="anchor">#</a></h3>
+
+<p>The best way to start with carew is to use the carew boilerplate: You will need composer.</p>
+
+<pre><code>$ php composer.phar create-project carew/boilerplate . -s dev
+$ bin/carew build
+</code></pre>
+
+<p>That's all, you can browse the <code>web/</code> directory.</p>
+
+<p>Now you must edit the <code>confi.yml</code> and the <code>posts/</code> and <code>pages/</code> folder contents.</p>
+
+<h3 id="git-integration">Git integration<a href="#git-integration" class="anchor">#</a></h3>
+
+<p>Once your <code>editor</code> branch has a carew project working, it's time to integrate it in your workflow. It could be done just by adding two more files to the <code>editor</code> branch: <code>.gitignore</code> and <code>install</code>.</p>
+
+<p><code>.gitignore</code> will prevent you from adding the <code>bin/</code> and <code>vendor/</code> folders</p>
+
+<pre><code>/vendor/
+/bin/
+</code></pre>
+
+<p>Also, <code>install</code> will be usefull when you want to install your <code>editor</code> environment after a <code>git clone</code></p>
+
+<pre><code>#!/bin/bash
+composer install -o
+bin/carew build
+</code></pre>
+
+<p>Remeber to add execution permisions</p>
+
+<pre><code>chmod +x install
+</code></pre>
+
+<p>Now you can add the root folder into git.</p>
+
+<p>In future checkouts from scratch, you will need to run the <code>install</code> script before be ready to work!</p>
+
+<pre><code>$ git clone https://github.com/kpacha/kpacha.github.io.git
+$ git checkout editor
+$ ./install
+</code></pre>
+
+<h2 id="master-branch">Master branch<a href="#master-branch" class="anchor">#</a></h2>
+
+<p>Checkout your <code>master</code> branch</p>
+
+<pre><code>$ git checkout master
+</code></pre>
+
+<p>And add the <code>.gitignore</code> file from the <code>editor</code> branch</p>
+
+<pre><code>$ git checkout editor -- .gitignore
+</code></pre>
+
+<p>Create a file called <code>update.sh</code></p>
+
+<pre><code>#!/bin/bash
+git checkout editor -- web
+cp -rp web/* .
+rm -rf web
+git reset HEAD web
+git status
+</code></pre>
+
+<p>After adding the execution permissions to <code>update.sh</code>, add them to git</p>
+
+<pre><code>$ chmod +x update.sh
+$ git add .gitignore update.sh
+$ git commit -m "set up the master branch"
+</code></pre>
+
+<p>Now, every time you want to push your generated statics you must run the <code>update.sh</code> script, add the untracked files listed, commit them and push the branch to github</p>
+
+<h2 id="posting">Posting<a href="#posting" class="anchor">#</a></h2>
+
+<p>From the <code>editor</code> branch, create your post entry</p>
+
+<pre><code>$ bin/carew generate:post "New post title"
+</code></pre>
+
+<p>Edit your entry and rebuild your web</p>
+
+<pre><code>$ bin/carew build
+</code></pre>
+
+<p>Now it's time to commit your changes into your <code>editor</code> branch and update your <code>master</code> one. Just type</p>
+
+<pre><code>$ git add .
+$ git commit -m "adding the 'New post title'"
+$ git checkout master
+$ git ./update.sh
+$ git add .
+$ git commit -m "publishing the 'New post title'"
+$ git push origin editor
+$ git push origin master
+</code></pre>
+
+<p>And you're done!</p>
+</p>
+
+<p></p>            </div>
           </div>
         
                   <footer>

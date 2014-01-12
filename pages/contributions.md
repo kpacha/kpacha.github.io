@@ -1,13 +1,14 @@
 ---
 title: Contributions
 subtitle: featured projects and collaborations
+layout: doc
 tags:
     - code
 navigations: main
 ---
 
 Projects
------
+----
 
 PHP:
 

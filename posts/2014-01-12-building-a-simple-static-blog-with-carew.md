@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  Building a simple static blog with carew
 layout: post
 tags:
@@ -7,7 +6,7 @@ tags:
     - carew
 ---
 
-I think the better topic for a first post must be 'how did I build this?', so here we go!
+I think the best topic for a first post must be 'how did I build this?', so here we go!
 
 First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. I know the [cookbook](http://carew.github.io/cookbook/hosting.html) recomends an easier way, but I don't want the carew installation on my `master` branch so, my repo has two branches:
 
