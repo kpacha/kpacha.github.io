@@ -15,7 +15,7 @@
             <email>kpacha666@gmail.com</email>
         </author>
         <link rel="alternate" type="text/html" href="http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html"/>
-        <content type="html" xml:lang="en"><![CDATA[<p>I think the better topic for a first post must be 'how did I build this?', so here we go!</p>
+        <content type="html" xml:lang="en"><![CDATA[<p>I think the best topic for a first post must be 'how did I build this?', so here we go!</p>
 
 <p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. I know the <a href="http://carew.github.io/cookbook/hosting.html">cookbook</a> recomends an easier way, but I don't want the carew installation on my <code>master</code> branch so, my repo has two branches:</p>
 
