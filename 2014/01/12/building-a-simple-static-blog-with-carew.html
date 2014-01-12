@@ -74,33 +74,117 @@
 
 <ul><li>checkout the 'editor' branch</li>
 <li>create new post</li>
-<li>commit changes</li>
 <li>re-build website</li>
+<li>commit changes</li>
 <li>merge the new website to master</li>
 <li>commit changes</li>
 <li>push both branches</li>
-</ul><h2 id="installation">Installation<a href="#installation" class="anchor">#</a></h2>
+</ul><h2 id="editor-branch">Editor branch<a href="#editor-branch" class="anchor">#</a></h2>
+
+<p>Create your editor branch just typing</p>
+
+<pre><code>$ git checkout -b editor
+</code></pre>
+
+<h3 id="carew-installation">Carew Installation<a href="#carew-installation" class="anchor">#</a></h3>
 
 <p>The best way to start with carew is to use the carew boilerplate: You will need composer.</p>
 
-<pre><code>$ php composer.phar create-project carew/boilerplate my_website -s dev
-$ cd my_website
+<pre><code>$ php composer.phar create-project carew/boilerplate . -s dev
 $ bin/carew build
 </code></pre>
 
 <p>That's all, you can browse the web/ directory.</p>
 
+<p>Now you must edit the confi.yml and the post and pages folder contents.</p>
+
+<h3 id="git-integration">Git integration<a href="#git-integration" class="anchor">#</a></h3>
+
+<p>Once your editor branch has a carew project working, it's time to integrate it in your workflow. It could be done just by adding two more files to the editor branch: '.gitignore' and 'install'.</p>
+
+<p>.gitignore will prevent you from adding the bin and vendor folders</p>
+
+<pre><code>/vendor/
+/bin/
+</code></pre>
+
+<p>install will be usefull when you want to install your 'editor' environment after a 'git clone'</p>
+
+<pre><code>#!/bin/bash
+composer install -o
+bin/carew build
+</code></pre>
+
+<p>Remeber to add execution permisions</p>
+
+<pre><code>chmod +x install
+</code></pre>
+
+<p>Now you can add the root folder into git.</p>
+
+<p>In future checkouts from scratch, you will need to run the install script before be ready to work!</p>
+
+<pre><code>$ git clone https://github.com/kpacha/kpacha.github.io.git
+$ git checkout editor
+$ ./install
+</code></pre>
+
+<h2 id="master-branch">Master branch<a href="#master-branch" class="anchor">#</a></h2>
+
+<p>Checkout your master branch</p>
+
+<pre><code>$ git checkout master
+</code></pre>
+
+<p>And add the .gitignore file from the editor branch</p>
+
+<pre><code>$ git checkout editor -- .gitignore
+</code></pre>
+
+<p>Create a file called update.sh</p>
+
+<pre><code>#!/bin/bash
+git checkout editor -- web
+cp -rp web/* .
+rm -rf web
+git reset HEAD web
+git status
+</code></pre>
+
+<p>After adding the execution permissions to update.sh, add them to git</p>
+
+<pre><code>$ chmod +x update.sh
+$ git add .gitignore update.sh
+$ git commit -m "set up the master branch"
+</code></pre>
+
+<p>Now, every time you want to push your generated statics you must run the update.sh script, add the untracked files listed, commit them and push the branch to github</p>
+
 <h2 id="posting">Posting<a href="#posting" class="anchor">#</a></h2>
 
-<p>Create your post entry</p>
+<p>From the editor branch, create your post entry</p>
 
-<pre><code>$ bin/carew generate:post "Your post title"
+<pre><code>$ bin/carew generate:post "New post title"
 </code></pre>
 
 <p>Edit your entry and rebuild your web</p>
 
 <pre><code>$ bin/carew build
 </code></pre>
+
+<p>Now it's time to commit your changes into your editor branch and update your master one. Just type</p>
+
+<pre><code>$ git add .
+$ git commit -m "adding the 'New post title'"
+$ git checkout master
+$ git ./update.sh
+$ git add .
+$ git commit -m "publishing the 'New post title'"
+$ git push origin editor
+$ git push origin master
+</code></pre>
+
+<p>And you're done!</p>
     </div>
 
           <hr>
