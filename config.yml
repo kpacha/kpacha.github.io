@@ -1,0 +1,11 @@
+site:
+    title:        kpacha
+    description:  Hacking around
+    author_name:  kpacha
+    author_email: kpacha666@gmail.com
+    author_url:   about.html
+    url_absolute: http://kpacha.github.io
+
+engine:
+    themes:
+        - %dir%/vendor/carew/theme-bootstrap
