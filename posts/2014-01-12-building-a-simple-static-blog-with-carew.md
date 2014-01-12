@@ -81,7 +81,7 @@ Create a file called update.sh
 
 	#!/bin/bash
 	git checkout editor -- web
-	mv web/* .
+	cp -rp web/* .
 	rm -rf web
 	git reset HEAD web
 	git status
