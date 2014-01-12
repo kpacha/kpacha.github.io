@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Building a simple static blog with carew</title>
+
+    <meta name="description" content="Hacking around">
+    <meta name="author" content="kpacha">
+    <meta name="viewport" content="width=device-width">
+
+    
+    <link rel="canonical" href="http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html"/>
+              <link rel="alternate" href="http://kpacha.github.io/feed/atom.xml" type="application/atom+xml" title="kpacha"/>
+      
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css"><link rel="stylesheet" href="../../../css/bootstrap-responsive.min.css"><link rel="stylesheet" href="../../../css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
+    <script src="../../../js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+  </head>
+
+  <body>
+    <!--[if lt IE 7]>
+        <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    
+          <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+              <div class="container">
+                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                  </a>
+                  <a class="brand" href="../../..">kpacha</a>
+                  <div class="nav-collapse collapse">
+                    <ul class="nav">
+                                                                                                            <li><a href="../../../about.html">About me</a></li>
+                                                            <li><a href="../../../index.html">Blog</a></li>
+                                                            <li><a href="../../../contributions.html">Contributions</a></li>
+                                                                                                </ul>
+                                      </div>
+              </div>
+          </div>
+      </div>
+    
+    
+          <div class="container">
+
+        
+                  <div class="row">
+            <div class="span10 offset1 content">
+                                                <div class="page-header">
+                    <h1>Building a simple static blog with carew</h1>
+                  </div>
+                              
+                <article>
+    <div class="pull-right date">
+      <i class="icon-calendar"></i>
+      Jan 12th, 2014
+    </div>
+
+    <div class="body">
+      <p>I think the better topic for a first post must be 'how did I build this?', so here we go!</p>
+
+<p>First of all, as I want my blog be served at github pages, I create a new repo name kpacha.github.io. The repo has two branches:</p>
+
+<ul><li>The 'master' branch stores the last static website builded as it's intended to serve the web contents for github pages</li>
+<li>The 'editor' branch stores the carew project and all the markdown pages</li>
+</ul><p>So the workflow I'm following here is quite simple:</p>
+
+<ul><li>checkout the 'editor' branch</li>
+<li>create new post</li>
+<li>commit changes</li>
+<li>re-build website</li>
+<li>merge the new website to master</li>
+<li>commit changes</li>
+<li>push both branches</li>
+</ul><h2 id="installation">Installation<a href="#installation" class="anchor">#</a></h2>
+
+<p>The best way to start with carew is to use the carew boilerplate: You will need composer.</p>
+
+<pre><code>$ php composer.phar create-project carew/boilerplate my_website -s dev
+$ cd my_website
+$ bin/carew build
+</code></pre>
+
+<p>That's all, you can browse the web/ directory.</p>
+
+<h2 id="posting">Posting<a href="#posting" class="anchor">#</a></h2>
+
+<p>Create your post entry</p>
+
+<pre><code>$ bin/carew generate:post "Your post title"
+</code></pre>
+
+<p>Edit your entry and rebuild your web</p>
+
+<pre><code>$ bin/carew build
+</code></pre>
+    </div>
+
+          <hr>
+      <h4>Tags:</h4>
+      <ul class="tag_box inline">
+                  <li>
+            <a href="../../../tags/php.html">Php</a>
+          </li>
+                  <li>
+            <a href="../../../tags/carew.html">Carew</a>
+          </li>
+              </ul>
+      </article>
+            </div>
+          </div>
+        
+                          <footer>
+            <p>
+              &copy;
+                              <a href="about.html">
+                  kpacha
+                </a>
+                            2014
+              <small>
+                with help from <a href="http://carew.github.com/" target="_blank">Carew</a>
+              </small>
+            </p>
+          </footer>
+        
+      </div>
+    
+    
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../../../js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+      <script src="../../../js/vendor/bootstrap.min.js"></script>
+      <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+      </body>
+</html>
