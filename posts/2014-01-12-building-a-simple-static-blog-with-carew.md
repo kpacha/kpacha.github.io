@@ -60,7 +60,7 @@ Once your `editor` branch has a carew project working, it's time to integrate it
 	/vendor/
 	/bin/
 
-Also, `install` will be usefull when you want to install your `editor` environment after a `git clone`
+Also, `install` will be useful when you want to install your `editor` environment after a `git clone`
 
 	#!/bin/bash
 	composer install -o
