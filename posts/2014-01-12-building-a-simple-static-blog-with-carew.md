@@ -129,3 +129,26 @@ Now it's time to commit your changes into your `editor` branch and update your `
 	$ git push origin master
 
 And you're done!
+
+Extra tip
+----
+
+Put the code for posting in a script for faster publishing. Let's call it `publish`
+
+	#!/bin/bash
+	git add .
+	git commit -m "adding the '$1'"
+	git checkout master
+	./update.sh
+	git add .
+	git commit -m "publishing the '$1'"
+	git push origin editor
+	git push origin master
+
+Do not forget to set the execution permisions
+
+	$ chmod +x publish
+
+And, after a succesful build, just run
+
+	$ ./publish "New post title"
