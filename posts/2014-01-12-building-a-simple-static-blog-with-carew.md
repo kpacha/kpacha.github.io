@@ -122,7 +122,7 @@ Now it's time to commit your changes into your `editor` branch and update your `
 	$ git add .
 	$ git commit -m "adding the 'New post title'"
 	$ git checkout master
-	$ git ./update.sh
+	$ ./update.sh
 	$ git add .
 	$ git commit -m "publishing the 'New post title'"
 	$ git push origin editor
