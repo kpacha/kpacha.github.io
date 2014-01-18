@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [[ $# -eq 0 ]] ; then
+    echo 'A commit message is required!'
+    exit 1
+fi
+
 git add .
 git commit -m "adding the '$1'"
 git checkout master
