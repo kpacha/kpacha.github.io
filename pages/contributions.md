@@ -22,6 +22,7 @@ PHP:
 
 JAVA:
 
+* [yuicompressor-server](http://kpacha.github.io/yuicompressor-server/)
 * [ninja-mustache](http://kpacha.github.io/ninja-mustache/)
 * [java-kata](http://kpacha.github.io/java-kata/)
 * [java-cache](https://github.com/kpacha/java-cache)
