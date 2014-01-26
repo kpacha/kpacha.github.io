@@ -11,5 +11,5 @@ git checkout master
 ./update.sh
 git add .
 git commit -m "publishing the '$1'"
-git push origin editor
-git push origin master
+#git push origin editor
+#git push origin master
