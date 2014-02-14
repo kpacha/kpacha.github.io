@@ -2,8 +2,6 @@
 title: Contributions
 subtitle: featured projects and collaborations
 layout: doc
-tags:
-    - code
 navigations: main
 ---
 
@@ -12,6 +10,9 @@ Projects
 
 PHP:
 
+* [reactive-hateoas](https://github.com/kpacha/reactive-hateoas)
+* [reactive-silex](https://github.com/kpacha/reactive-silex)
+* [simple-oauth2-server](https://github.com/kpacha/simple-oauth2-server)
 * [php-benchmark-tool](https://github.com/kpacha/php-benchmark-tool)
 * [component-benchmark](https://github.com/kpacha/component-benchmark)
 * [helmet](https://github.com/kpacha/helmet)
@@ -44,4 +45,4 @@ Collaborations
 * [PUGX/aop](https://github.com/kpacha/aop)
 * [ericdwhite/mustache.java-spring-webmvc](https://github.com/kpacha/mustache.java-spring-webmvc)
 
-For more information visit [my github account](http://github.com/kpacha)
+For more projects and collaborations, visit [my github account](http://github.com/kpacha)

@@ -7,18 +7,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Blogging</title>
+    <title>Improving the css/js compression process</title>
 
     <meta name="description" content="Hacking around">
     <meta name="author" content="kpacha">
     <meta name="viewport" content="width=device-width">
 
     
-    <link rel="canonical" href="http://kpacha.github.io/index.html"/>
+    <link rel="canonical" href="http://kpacha.github.io/2014/02/14/improving-the-css-js-compression-process.html"/>
               <link rel="alternate" href="http://kpacha.github.io/feed/atom.xml" type="application/atom+xml" title="kpacha"/>
       
-        <link rel="stylesheet" href="./css/bootstrap.min.css"><link rel="stylesheet" href="./css/bootstrap-responsive.min.css"><link rel="stylesheet" href="./css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
-    <script src="./js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css"><link rel="stylesheet" href="../../../css/bootstrap-responsive.min.css"><link rel="stylesheet" href="../../../css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
+    <script src="../../../js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
   </head>
 
   <body>
@@ -35,12 +35,12 @@
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
                   </a>
-                  <a class="brand" href=".">kpacha</a>
+                  <a class="brand" href="../../..">kpacha</a>
                   <div class="nav-collapse collapse">
                     <ul class="nav">
-                                                                                                            <li><a href="about.html">About me</a></li>
-                                                            <li><a href="archive.html">Archive</a></li>
-                                                            <li><a href="contributions.html">Contributions</a></li>
+                                                                                                            <li><a href="../../../about.html">About me</a></li>
+                                                            <li><a href="../../../archive.html">Archive</a></li>
+                                                            <li><a href="../../../contributions.html">Contributions</a></li>
                                                                                                 </ul>
                                       </div>
               </div>
@@ -54,18 +54,17 @@
                   <div class="row">
             <div class="span10 offset1 content">
                                                 <div class="page-header">
-                    <h1>Blogging <small>for fun and profit</small></h1>
+                    <h1>Improving the css/js compression process</h1>
                   </div>
                               
-              <p>    <h2>
-        <a href="2014/02/14/improving-the-css-js-compression-process.html">
-            Improving the css/js compression process
-        </a>
-        <small>
-            Feb 14
-                    </small>
-    </h2>
-    <p>Everybody in the web business knows that deploying uncompressed css/js files is a bad idea. It is a waste of time and money since storage and bandwith usually are not free resources (this web is a clear exception, so here I do not care too much). And the website will take more time to get fully rendered. So people use tools like <a href="http://yui.github.io/yuicompressor/">yui-compressor</a> in order to minify their css and javascript files. But adding those compressed files to the SCM tool does not feel right because there is no way to know if the compressed files are up to date with the uncompressed version. The solution is compress those files just before deploying a new version.</p>
+                <article>
+    <div class="pull-right date">
+      <i class="icon-calendar"></i>
+      Feb 14th, 2014
+    </div>
+
+    <div class="body">
+      <p>Everybody in the web business knows that deploying uncompressed css/js files is a bad idea. It is a waste of time and money since storage and bandwith usually are not free resources (this web is a clear exception, so here I do not care too much). And the website will take more time to get fully rendered. So people use tools like <a href="http://yui.github.io/yuicompressor/">yui-compressor</a> in order to minify their css and javascript files. But adding those compressed files to the SCM tool does not feel right because there is no way to know if the compressed files are up to date with the uncompressed version. The solution is compress those files just before deploying a new version.</p>
 
 <p>This aproach is fine if you are deploying a pre-builded package to your servers. But, what if you are just checking out the code from your SCM? In this scenario, you will need to install your compressing tool (with all its requirements) in every server and trigger the compression process after the checkout. Why would you spend so much time doing the same operation again and again? Are your files different from one host to another or are they almost the same? How often do you deploy? Just take the DRY pattern to the next abstraction level and delegate that process to a dedicated service!</p>
 
@@ -82,16 +81,29 @@
 <p>The yuicompressor-server is not the best solution but it is the next baby-step in the continuous improvement process. It is the small hop you make to get things running better without any big, risky change. Some day in the future, your CI server will handle the css/js compression task before packaging a release and deploy it. Then, after celebrating your new achivement in the long road to the perfect processes and the leanest environment, you will be able to shutdown your compressor server and forget it. Until that happy day, why should you be doing nothing to improve your daily work?</p>
 
 <p>Read more about <a href="http://kpacha.github.io/yuicompressor-server/">yuicompressor-server</a> or inspect the <a href="http://github.com/kpacha/yuicompressor-server/">code</a></p>
-</p>
+    </div>
 
-<h2 id="older-blog-posts">Older blog posts<a href="#older-blog-posts" class="anchor">#</a></h2>
-
-<p><ul class="unstyled" style="padding-left:30px"><li class=""><h5><a href="2014/01/12/building-a-simple-static-blog-with-carew.html"><i class="icon-book"></i>
-                                Building a simple static blog with carew
-                                <small>(2014-01-12)</small></a></h5></li></ul></p>            </div>
+          <hr>
+      <h4>Tags:</h4>
+      <ul class="tag_box inline">
+                  <li>
+            <a href="../../../tags/php.html">Php</a>
+          </li>
+                  <li>
+            <a href="../../../tags/java.html">Java</a>
+          </li>
+                  <li>
+            <a href="../../../tags/yui-compressor.html">Yui-Compressor</a>
+          </li>
+                  <li>
+            <a href="../../../tags/jetty.html">Jetty</a>
+          </li>
+              </ul>
+      </article>
+            </div>
           </div>
         
-                  <footer>
+                          <footer>
             <p>
               &copy;
                               <a href="about.html">
@@ -103,13 +115,15 @@
               </small>
             </p>
           </footer>
-              </div>
+        
+      </div>
     
     
-          <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-      <script>window.jQuery || document.write('<script src="./js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
-      <script src="./js/vendor/bootstrap.min.js"></script>
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../../../js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+      <script src="../../../js/vendor/bootstrap.min.js"></script>
       <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
+    
       </body>
 </html>
