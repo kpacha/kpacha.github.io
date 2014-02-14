@@ -13,3 +13,5 @@ More about me? Here you have some links to external tools:
 [résumé](http://resume.github.io/?kpacha)
 
 [open source report card](http://osrc.dfm.io/kpacha)
+
+[starred github repos](https://github.com/stars/kpacha)
