@@ -5,7 +5,7 @@
     <link href="http://kpacha.github.io/feed/index.atom" rel="self" />
     <link href="http://kpacha.github.io/" />
         <id>http://kpacha.github.io/</id>
-            <updated>2014-02-14T00:00:00+01:00</updated>
+            <updated>2014-10-19T00:00:00+02:00</updated>
             <entry>
         <title>Building a simple static blog with carew</title>
                 <id>http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html</id>
@@ -196,5 +196,397 @@ git push origin master
 <p>The yuicompressor-server is not the best solution but it is the next baby-step in the continuous improvement process. It is the small hop you make to get things running better without any big, risky change. Some day in the future, your CI server will handle the css/js compression task before packaging a release and deploy it. Then, after celebrating your new achivement in the long road to the perfect processes and the leanest environment, you will be able to shutdown your compressor server and forget it. Until that happy day, why should you be doing nothing to improve your daily work?</p>
 
 <p>Read more about <a href="http://kpacha.github.io/yuicompressor-server/">yuicompressor-server</a> or inspect the <a href="http://github.com/kpacha/yuicompressor-server/">code</a></p>]]></content>
+    </entry>
+        <entry>
+        <title>Discovering your services with ZooKeeper</title>
+                <id>http://kpacha.github.io/2014/10/18/discovering-your-services-with-zookeeper.html</id>
+                <updated>2014-10-18T00:00:00+02:00</updated>
+        <author>
+            <name>kpacha</name>
+            <email>kpacha666@gmail.com</email>
+        </author>
+        <link rel="alternate" type="text/html" href="http://kpacha.github.io/2014/10/18/discovering-your-services-with-zookeeper.html"/>
+        <content type="html" xml:lang="en"><![CDATA[<p>This is the first of a several articles I am planing to write about service discovering in PHP environments, so let's start it.</p>
+
+<h2>The problem</h2>
+
+<p>Almost all apps needs to interact with external services (like databases or REST services). It's a fact. And they need some way to identify those services and the nodes that conform them. Usually, you put this info in a config file and your code just reads that file in order to know the database connection details.</p>
+
+<p>The naive aproach described in the previous block has an important cons: it does not scale because every update requires a new deployment (due you're mixing code with configuration) of all the affected node (all the services depending on the updated ones)</p>
+
+<h2>The solution</h2>
+
+<p>As the <a href="http://zookeeper.apache.org/">official website</a> says: <em>"ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services"</em>. Why don't we delegate all the hard work to it?</p>
+
+<p>ZooKeeper is a very raw tool, so I'd rather go with the <a href="http://curator.apache.org/index.html">Curator</a> framework. It comes with a lot of recipes already implemented. Also, it has two very interesting extensions: 'Service Discovering' and 'Service Discovering Server'.</p>
+
+<p>The 'Service Discovering' system provides a mechanism for:</p>
+
+<ul>
+<li>Services to register their availability</li>
+<li>Locating a single instance of a particular service</li>
+<li>Notifying when the instances of a service change</li>
+</ul>
+
+<p>The 'Service Discovery Server' bridges non-Java or legacy applications with the Curator Service Discovery exposing RESTful web services to register, remove, query, etc. services.</p>
+
+<p>The architecture is simple: some ZooKeeper nodes will be the backend of the autodiscovering system and the frontend nodes will host an implementation of the 'Service Discovery Server'. Clients will interact with the frontend nodes using a simple curl-based sdk.</p>
+
+<h2>REST server implementation</h2>
+
+<p>The Curator website says <em>"The Service Discovery Server provides JAX-RS components that can be incorporated into a container of your choice (Tomcat, Jetty, etc.). You can also choose any JAX-RS provider (Jersey, RESTEasy, etc.)."</em>. So let's try to create a simple jetty-based server exposing the JAX-RS components.</p>
+
+<p>The first step is defining the project dependencies. Using the well-known maven project definition file, we must require the <code>curator-x-service-discovery</code>, the <code>jetty-servlet</code>, the <code>jersey-servlet</code> and the <code>jersey-core</code>. Also, we should configure the <code>exec-maven-plugin</code> and the <code>maven-assembly-artifact</code> in order to buld an executable fat-jar.</p>
+
+<pre><code>    &lt;project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+        &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+        &lt;groupId&gt;com.github.kpacha&lt;/groupId&gt;
+        &lt;artifactId&gt;suricate&lt;/artifactId&gt;
+        &lt;version&gt;0.0.2-SNAPSHOT&lt;/version&gt;
+
+        &lt;properties&gt;
+                &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+                &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+                &lt;jetty.version&gt;9.1.1.v20140108&lt;/jetty.version&gt;
+                &lt;jersey.version&gt;1.11&lt;/jersey.version&gt;
+                &lt;commons-cli.version&gt;1.2&lt;/commons-cli.version&gt;
+                &lt;maven-compiler-plugin.version&gt;2.3.2&lt;/maven-compiler-plugin.version&gt;
+                &lt;jdk.version&gt;1.7&lt;/jdk.version&gt;
+        &lt;/properties&gt;
+
+        &lt;dependencies&gt;
+                &lt;dependency&gt;
+                        &lt;groupId&gt;com.netflix.curator&lt;/groupId&gt;
+                        &lt;artifactId&gt;curator-x-discovery-server&lt;/artifactId&gt;
+                        &lt;version&gt;1.3.3&lt;/version&gt;
+                &lt;/dependency&gt;
+
+                &lt;dependency&gt;
+                        &lt;groupId&gt;org.eclipse.jetty&lt;/groupId&gt;
+                        &lt;artifactId&gt;jetty-servlet&lt;/artifactId&gt;
+                        &lt;version&gt;${jetty.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+
+                &lt;dependency&gt;
+                        &lt;groupId&gt;com.sun.jersey&lt;/groupId&gt;
+                        &lt;artifactId&gt;jersey-servlet&lt;/artifactId&gt;
+                        &lt;version&gt;${jersey.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+
+                &lt;dependency&gt;
+                        &lt;groupId&gt;com.sun.jersey&lt;/groupId&gt;
+                        &lt;artifactId&gt;jersey-core&lt;/artifactId&gt;
+                        &lt;version&gt;${jersey.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+
+                &lt;dependency&gt;
+                        &lt;groupId&gt;commons-cli&lt;/groupId&gt;
+                        &lt;artifactId&gt;commons-cli&lt;/artifactId&gt;
+                        &lt;version&gt;${commons-cli.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+        &lt;build&gt;
+                &lt;plugins&gt;
+                        &lt;plugin&gt;
+                                &lt;groupId&gt;org.mortbay.jetty&lt;/groupId&gt;
+                                &lt;artifactId&gt;jetty-maven-plugin&lt;/artifactId&gt;
+                                &lt;version&gt;${jetty.version}&lt;/version&gt;
+                        &lt;/plugin&gt;
+
+                        &lt;plugin&gt;
+                                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+                                &lt;artifactId&gt;exec-maven-plugin&lt;/artifactId&gt;
+                                &lt;version&gt;1.1&lt;/version&gt;
+                                &lt;executions&gt;
+                                        &lt;execution&gt;
+                                                &lt;goals&gt;
+                                                        &lt;goal&gt;java&lt;/goal&gt;
+                                                &lt;/goals&gt;
+                                        &lt;/execution&gt;
+                                &lt;/executions&gt;
+                                &lt;configuration&gt;
+                                        &lt;mainClass&gt;com.github.kpacha.suricate.Suricate&lt;/mainClass&gt;
+                                &lt;/configuration&gt;
+                        &lt;/plugin&gt;
+
+                        &lt;plugin&gt;
+                                &lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;
+                                &lt;version&gt;2.4&lt;/version&gt;
+                                &lt;configuration&gt;
+                                        &lt;descriptorRefs&gt;
+                                                &lt;descriptorRef&gt;jar-with-dependencies&lt;/descriptorRef&gt;
+                                        &lt;/descriptorRefs&gt;
+                                        &lt;archive&gt;
+                                                &lt;manifest&gt;
+                                                        &lt;mainClass&gt;com.github.kpacha.suricate.Suricate&lt;/mainClass&gt;
+                                                &lt;/manifest&gt;
+                                        &lt;/archive&gt;
+                                &lt;/configuration&gt;
+                        &lt;/plugin&gt;
+
+                        &lt;plugin&gt;
+                                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                                &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                                &lt;version&gt;${maven-compiler-plugin.version}&lt;/version&gt;
+                                &lt;configuration&gt;
+                                        &lt;source&gt;${jdk.version}&lt;/source&gt;
+                                        &lt;target&gt;${jdk.version}&lt;/target&gt;
+                                &lt;/configuration&gt;
+                        &lt;/plugin&gt;
+                &lt;/plugins&gt;
+        &lt;/build&gt;
+    &lt;/project&gt;
+</code></pre>
+
+<p>Next, we must create a StringDiscoveryResource extending DiscoveryResource to bind the path "/" to the ContextResolver. Not funny at all.</p>
+
+<pre><code>@Path("/")
+public class StringDiscoveryResource extends DiscoveryResource&lt;String&gt; {
+    public StringDiscoveryResource(
+            @Context ContextResolver&lt;DiscoveryContext&lt;String&gt;&gt; resolver) {
+        super(resolver.getContext(DiscoveryContext.class));
+    }
+}
+</code></pre>
+
+<p>Now we need to create an Application and set-up the curator framework and the service discovery. The curator framework will setup the connection to the ZooKeeper server. The <code>ExponentialBackoffRetry</code> strategy is the recomended one here.</p>
+
+<pre><code>CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(
+        configuration.getZkConnection(), new ExponentialBackoffRetry(
+                1000, 3));
+curatorFramework.start();
+</code></pre>
+
+<p>The Application also requires a service discovery instance from the curator framework</p>
+
+<pre><code>ServiceDiscovery&lt;String&gt; serviceDiscovery = new ServiceDiscoveryImpl&lt;String&gt;(
+        curatorFramework, configuration.getZkBasePath(),
+        new JsonInstanceSerializer&lt;String&gt;(String.class), null);
+</code></pre>
+
+<p>Our StringDiscoveryContext has to be instantiate too</p>
+
+<pre><code>context = new StringDiscoveryContext(serviceDiscovery,
+        new RandomStrategy&lt;String&gt;(),
+        configuration.getInstanceCleanupMillis());
+</code></pre>
+
+<p>And the thread responsible for cleaning up the evicted STATIC nodes</p>
+
+<pre><code>instanceCleanup = new InstanceCleanup(serviceDiscovery,
+        configuration.getInstanceCleanupMillis());
+instanceCleanup.start();
+</code></pre>
+
+<p>Since we want to work with json encoded payloads, we must set up the json service instance marshaller</p>
+
+<pre><code>serviceInstanceMarshaller = new JsonServiceInstanceMarshaller&lt;String&gt;(context);
+serviceInstancesMarshaller = new JsonServiceInstancesMarshaller&lt;String&gt;(context);
+</code></pre>
+
+<p>After playing with very boring stuff like the getSingletons() implementation and registering the StringDiscoveringResource, the <a href="https://github.com/kpacha/suricate/blob/master/src/main/java/com/github/kpacha/suricate/Application.java">Application</a> comes out.</p>
+
+<p>Time to coordinate the Application with the JettyServer! Pass the injected Application to the ServletContainer and register the context path and bind the servlet to the route "/*".</p>
+
+<pre><code>public void run() throws Exception {
+        ServletContainer container = new ServletContainer(app);
+
+        server = new Server(port);
+
+        ServletContextHandler context = new ServletContextHandler(
+                ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+        context.addServlet(new ServletHolder(container), "/*");
+
+        server.start();
+        server.join();
+}
+</code></pre>
+
+<p>The final step is to create a Main class with the static main method to create the Application and run the JettyServer.</p>
+
+<pre><code>public static void main(String[] args) throws Exception {
+        Configuration config = new Configuration(args);
+        JettyServer jetty = new JettyServer(new Application(config),
+                config.getPort());
+        jetty.run();
+}
+</code></pre>
+
+<p>I am sure you have already detected I also created a <a href="https://github.com/kpacha/suricate/blob/master/src/main/java/com/github/kpacha/suricate/Configuration.java">Config</a> class to encapsulate all the command line manipulation, so the Application remains as client agnostic as possible.</p>
+
+<p>The complete <a href="https://github.com/kpacha/suricate">suricate project</a> is available on github. If you do not want any further customization, it could get the job done!</p>
+
+<h2>Setting up your environment</h2>
+
+<p>In devel, you just need to get a single ZooKeeper server running. Check the <a href="http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html">quick start help</a> to get it done. Once you have your config, just run</p>
+
+<pre><code>$ /path/to/zk/$ bin/zkServer.sh start
+JMX enabled by default
+Using config: /home/kpacha/zookeeper/zookeeper-3.4.6/bin/../conf/zoo.cfg
+Starting zookeeper ... STARTED
+</code></pre>
+
+<p>in production environments, you must think about what replication startegy fits you best. The complete documentation is <a href="http://zookeeper.apache.org/doc/trunk/zookeeperAdmin.html#sc_zkMulitServerSetup">here</a>. Remember to properly set up your suricate servers to we aware of the multiserver architecture you are using.</p>
+
+<h2>Running the REST Server</h2>
+
+<p>Follow <a href="https://github.com/kpacha/suricate#build-and-run-the-fat-jar">this instructions</a> to build the fat-jar and then start the suricate server with</p>
+
+<pre><code>$ java -jar /path/to/suricate/target/suricate-0.0.2-SNAPSHOT-jar-with-dependencies.jar
+ INFO [main] (Configuration.java:86) - Param [p]: 8080
+ INFO [main] (Configuration.java:75) - Param [c]: 127.0.0.1:2181
+ INFO [main] (Configuration.java:75) - Param [b]: /suricate/service-directory
+ INFO [main] (Configuration.java:86) - Param [t]: 15000
+DEBUG [main] (Application.java:35) - Curator framework started!
+ WARN [ConnectionStateManager-0] (ConnectionStateManager.java:174) - There are no ConnectionStateListeners registered.
+DEBUG [main] (Application.java:40) - ServiceDiscovery started!
+DEBUG [main] (Application.java:45) - DiscoveryContext started!
+DEBUG [main] (Application.java:50) - SuricateInstanceCleanup started!
+DEBUG [main] (Application.java:56) - Json marshallers started!
+oct 19, 2014 5:53:36 PM com.sun.jersey.server.impl.application.WebApplicationImpl _initiate
+INFO: Initiating Jersey application, version 'Jersey: 1.11 12/09/2011 10:27 AM'
+</code></pre>
+
+<p>All the options are documented at the home of the project (https://github.com/kpacha/suricate#usage)</p>
+]]></content>
+    </entry>
+        <entry>
+        <title>Creating your sdk for suricate</title>
+                <id>http://kpacha.github.io/2014/10/19/creating-your-sdk-for-suricate.html</id>
+                <updated>2014-10-19T00:00:00+02:00</updated>
+        <author>
+            <name>kpacha</name>
+            <email>kpacha666@gmail.com</email>
+        </author>
+        <link rel="alternate" type="text/html" href="http://kpacha.github.io/2014/10/19/creating-your-sdk-for-suricate.html"/>
+        <content type="html" xml:lang="en"><![CDATA[<p>This is the second article of the <em>service discovering in PHP environments</em> serie. The <a href="../../../2014/10/18/discovering-your-services-with-zookeeper.html">
+        first one
+    </a> was about implementing a Curator Service Discovering REST Server. This will be about creating a simple sdk to provide a nice integration to the autodiscovering service to your clients.</p>
+
+<h2 id="the-rest-interface">The REST interface<a href="#the-rest-interface" class="anchor">#</a></h2>
+
+<p>The rest interface is defined in the homepage of the <a href="https://github.com/kpacha/suricate#usage">suricate project</a>.</p>
+
+<p>TLTR? here goes the short version:</p>
+
+<pre><code># Register the host 'ca2fff8e-d756-480c-b59e-8297ff88624b' in the cluster 'test'
+$ curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X PUT -d '{"name": "test", "id": "ca2fff8e-d756-480c-b59e-8297ff88624b", "address": "10.20.30.40", "port": 1234, "payload": "supu", "registrationTimeUTC": 1325129459728, "serviceType": "STATIC"}' http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+
+# Get all registered services
+$ curl -i http://localhost:8080/v1/service
+
+# Get all nodes in 'test' service
+$ curl -i http://localhost:8080/v1/service/test
+
+# Get the node 'ca2fff8e-d756-480c-b59e-8297ff88624b' of the 'test' service
+$ curl -i http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+
+
+# Get the node 'ca2fff8e-d756-480c-b59e-8297ff88624b' of the 'test' service
+$ curl -i -X DELETE http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+</code></pre>
+
+<p>As you must seen, the data structure is</p>
+
+<p><em>ServiceInstance</em></p>
+
+<pre><code>{
+   "name": "test",
+   "id": "ca2fff8e-d756-480c-b59e-8297ff88624b",
+   "address": "10.20.30.40",
+   "port": 1234,
+   "payload": "From Test",
+   "registrationTimeUTC": 1325129459728,
+   "serviceType": "STATIC"
+}
+</code></pre>
+
+<p><em>ServiceInstances</em></p>
+
+<pre><code>[
+    {
+       "name": "test",
+       "id": "ca2fff8e-d756-480c-b59e-8297ff88624b",
+       "address": "10.20.30.40",
+       "port": 1234,
+       "payload": "From Test",
+       "registrationTimeUTC": 1325129459728,
+       "serviceType": "STATIC"
+    },
+
+    {
+       "name": "foo",
+       "id": "bd4fff8e-c234-480c-f6ee-8297ff813765",
+       "address": "10.20.30.40",
+       "sslPort": 1235,
+       "payload": "foo-bar",
+       "registrationTimeUTC": 1325129459728,
+       "serviceType": "STATIC"
+    }
+]
+</code></pre>
+
+<p><em>ServiceNames</em></p>
+
+<pre><code>[
+    {
+        "name": "foo"
+    },
+
+    {
+        "name": "bar"
+    }
+]
+</code></pre>
+
+<h2 id="the-rest-client">The REST client<a href="#the-rest-client" class="anchor">#</a></h2>
+
+<p>Once you are familiar with the REST interface, it's time to build the client. I did it in php, with great help of the Guzzle lib.</p>
+
+<p>First of all, the package dependencies. I created a REST client and CLI interface, so there were my dependencies:</p>
+
+<pre><code>{
+    ...
+    "require": {
+        "php": "&gt;=5.3.3",
+        "symfony/console": "~2.4",
+        "guzzle/guzzle":"~3.7"
+    },
+    ...
+}
+</code></pre>
+
+<p>The suricate client must expose the metods the REST interface encasulates, so it has to implement this 'interface':</p>
+
+<pre><code>abstract public function getAllNames();
+
+abstract public function getAll($service);
+
+abstract public function get($service, $id);
+
+abstract public function putService($service, $id, $node);
+
+abstract public function removeService($service, $id);
+</code></pre>
+
+<p>My implementation of this 'interface' is <a href="https://github.com/kpacha/suricate-php-sdk/blob/master/src/Suricate.php">here</a>.</p>
+
+<p>Whith your implementation, you'll be able to interact with the REST service discovering server easily</p>
+
+<pre><code>$client = ... // instantiate your implementation
+
+$success = $client-&gt;putService($serviceName, $nodeId, $node);
+$serviceNames = $client-&gt;getAllNames();
+$nodes = $client-&gt;getAll($serviceName);
+$node = $client-&gt;get($serviceName, $nodeId);
+$success = $client-&gt;removeService($serviceName, $nodeId);
+</code></pre>
+
+<p>The <a href="https://github.com/kpacha/suricate-php-sdk">suricate-php-sdk</a> also offers a set of commands to interact to de REST server through the CLI.</p>
+
+<p>Coming soon: getting more from the sdk and integrating the service discovering with your local configuration</p>]]></content>
     </entry>
     </feed>
