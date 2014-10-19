@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Creating your sdk for suricate</title>
+
+    <meta name="description" content="Hacking around">
+    <meta name="author" content="kpacha">
+    <meta name="viewport" content="width=device-width">
+
+    
+    <link rel="canonical" href="http://kpacha.github.io/2014/10/19/creating-your-sdk-for-suricate.html"/>
+              <link rel="alternate" href="http://kpacha.github.io/feed/atom.xml" type="application/atom+xml" title="kpacha"/>
+      
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css"><link rel="stylesheet" href="../../../css/bootstrap-responsive.min.css"><link rel="stylesheet" href="../../../css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
+    <script src="../../../js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+  </head>
+
+  <body>
+    <!--[if lt IE 7]>
+        <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    
+          <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+              <div class="container">
+                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                  </a>
+                  <a class="brand" href="../../..">kpacha</a>
+                  <div class="nav-collapse collapse">
+                    <ul class="nav">
+                                                                                                            <li><a href="../../../about.html">About me</a></li>
+                                                            <li><a href="../../../archive.html">Archive</a></li>
+                                                            <li><a href="../../../contributions.html">Contributions</a></li>
+                                                                                                </ul>
+                                      </div>
+              </div>
+          </div>
+      </div>
+    
+    
+          <div class="container">
+
+        
+                  <div class="row">
+            <div class="span10 offset1 content">
+                                                <div class="page-header">
+                    <h1>Creating your sdk for suricate</h1>
+                  </div>
+                              
+                <article>
+    <div class="pull-right date">
+      <i class="icon-calendar"></i>
+      Oct 19th, 2014
+    </div>
+
+    <div class="body">
+      <p>This is the second article of the <em>service discovering in PHP environments</em> serie. The <a href="../../../2014/10/18/discovering-your-services-with-zookeeper.html">
+        first one
+    </a> was about implementing a Curator Service Discovering REST Server. This will be about creating a simple sdk to provide a nice integration to the autodiscovering service to your clients.</p>
+
+<h2 id="the-rest-interface">The REST interface<a href="#the-rest-interface" class="anchor">#</a></h2>
+
+<p>The rest interface is defined in the homepage of the <a href="https://github.com/kpacha/suricate#usage">suricate project</a>.</p>
+
+<p>TLTR? here goes the short version:</p>
+
+<pre><code># Register the host 'ca2fff8e-d756-480c-b59e-8297ff88624b' in the cluster 'test'
+$ curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X PUT -d '{"name": "test", "id": "ca2fff8e-d756-480c-b59e-8297ff88624b", "address": "10.20.30.40", "port": 1234, "payload": "supu", "registrationTimeUTC": 1325129459728, "serviceType": "STATIC"}' http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+
+# Get all registered services
+$ curl -i http://localhost:8080/v1/service
+
+# Get all nodes in 'test' service
+$ curl -i http://localhost:8080/v1/service/test
+
+# Get the node 'ca2fff8e-d756-480c-b59e-8297ff88624b' of the 'test' service
+$ curl -i http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+
+
+# Get the node 'ca2fff8e-d756-480c-b59e-8297ff88624b' of the 'test' service
+$ curl -i -X DELETE http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
+</code></pre>
+
+<p>As you must seen, the data structure is</p>
+
+<p><em>ServiceInstance</em></p>
+
+<pre><code>{
+   "name": "test",
+   "id": "ca2fff8e-d756-480c-b59e-8297ff88624b",
+   "address": "10.20.30.40",
+   "port": 1234,
+   "payload": "From Test",
+   "registrationTimeUTC": 1325129459728,
+   "serviceType": "STATIC"
+}
+</code></pre>
+
+<p><em>ServiceInstances</em></p>
+
+<pre><code>[
+    {
+       "name": "test",
+       "id": "ca2fff8e-d756-480c-b59e-8297ff88624b",
+       "address": "10.20.30.40",
+       "port": 1234,
+       "payload": "From Test",
+       "registrationTimeUTC": 1325129459728,
+       "serviceType": "STATIC"
+    },
+
+    {
+       "name": "foo",
+       "id": "bd4fff8e-c234-480c-f6ee-8297ff813765",
+       "address": "10.20.30.40",
+       "sslPort": 1235,
+       "payload": "foo-bar",
+       "registrationTimeUTC": 1325129459728,
+       "serviceType": "STATIC"
+    }
+]
+</code></pre>
+
+<p><em>ServiceNames</em></p>
+
+<pre><code>[
+    {
+        "name": "foo"
+    },
+
+    {
+        "name": "bar"
+    }
+]
+</code></pre>
+
+<h2 id="the-rest-client">The REST client<a href="#the-rest-client" class="anchor">#</a></h2>
+
+<p>Once you are familiar with the REST interface, it's time to build the client. I did it in php, with great help of the Guzzle lib.</p>
+
+<p>First of all, the package dependencies. I created a REST client and CLI interface, so there were my dependencies:</p>
+
+<pre><code>{
+    ...
+    "require": {
+        "php": "&gt;=5.3.3",
+        "symfony/console": "~2.4",
+        "guzzle/guzzle":"~3.7"
+    },
+    ...
+}
+</code></pre>
+
+<p>The suricate client must expose the metods the REST interface encasulates, so it has to implement this 'interface':</p>
+
+<pre><code>abstract public function getAllNames();
+
+abstract public function getAll($service);
+
+abstract public function get($service, $id);
+
+abstract public function putService($service, $id, $node);
+
+abstract public function removeService($service, $id);
+</code></pre>
+
+<p>My implementation of this 'interface' is <a href="https://github.com/kpacha/suricate-php-sdk/blob/master/src/Suricate.php">here</a>.</p>
+
+<p>Whith your implementation, you'll be able to interact with the REST service discovering server easily</p>
+
+<pre><code>$client = ... // instantiate your implementation
+
+$success = $client-&gt;putService($serviceName, $nodeId, $node);
+$serviceNames = $client-&gt;getAllNames();
+$nodes = $client-&gt;getAll($serviceName);
+$node = $client-&gt;get($serviceName, $nodeId);
+$success = $client-&gt;removeService($serviceName, $nodeId);
+</code></pre>
+
+<p>The <a href="https://github.com/kpacha/suricate-php-sdk">suricate-php-sdk</a> also offers a set of commands to interact to de REST server through the CLI.</p>
+
+<p>Coming soon: getting more from the sdk and integrating the service discovering with your local configuration</p>
+    </div>
+
+          <hr>
+      <h4>Tags:</h4>
+      <ul class="tag_box inline">
+                  <li>
+            <a href="../../../tags/php.html">Php</a>
+          </li>
+                  <li>
+            <a href="../../../tags/zookeeper.html">Zookeeper</a>
+          </li>
+                  <li>
+            <a href="../../../tags/suricate.html">Suricate</a>
+          </li>
+                  <li>
+            <a href="../../../tags/service discovering.html">Service Discovering</a>
+          </li>
+              </ul>
+      </article>
+            </div>
+          </div>
+        
+                          <footer>
+            <p>
+              &copy;
+                              <a href="about.html">
+                  kpacha
+                </a>
+                            2014
+              <small>
+                with help from <a href="http://carew.github.com/" target="_blank">Carew</a>
+              </small>
+            </p>
+          </footer>
+        
+      </div>
+    
+    
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../../../js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+      <script src="../../../js/vendor/bootstrap.min.js"></script>
+      <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+      </body>
+</html>
