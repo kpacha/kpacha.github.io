@@ -15,7 +15,7 @@ The REST interface
 
 The rest interface is defined in the homepage of the [suricate project](https://github.com/kpacha/suricate#usage).
 
-TLTR? here goes the short version:
+TLDR? here goes the short version:
 
     # Register the host 'ca2fff8e-d756-480c-b59e-8297ff88624b' in the cluster 'test'
     $ curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X PUT -d '{"name": "test", "id": "ca2fff8e-d756-480c-b59e-8297ff88624b", "address": "10.20.30.40", "port": 1234, "payload": "supu", "registrationTimeUTC": 1325129459728, "serviceType": "STATIC"}' http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
