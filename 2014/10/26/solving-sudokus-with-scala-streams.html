@@ -7,18 +7,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <title>Blogging</title>
+    <title>Solving sudokus with scala streams</title>
 
     <meta name="description" content="Hacking around">
     <meta name="author" content="kpacha">
     <meta name="viewport" content="width=device-width">
 
     
-    <link rel="canonical" href="http://kpacha.github.io/index.html"/>
+    <link rel="canonical" href="http://kpacha.github.io/2014/10/26/solving-sudokus-with-scala-streams.html"/>
               <link rel="alternate" href="http://kpacha.github.io/feed/atom.xml" type="application/atom+xml" title="kpacha"/>
       
-        <link rel="stylesheet" href="./css/bootstrap.min.css"><link rel="stylesheet" href="./css/bootstrap-responsive.min.css"><link rel="stylesheet" href="./css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
-    <script src="./js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css"><link rel="stylesheet" href="../../../css/bootstrap-responsive.min.css"><link rel="stylesheet" href="../../../css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
+    <script src="../../../js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
   </head>
 
   <body>
@@ -35,12 +35,12 @@
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
                   </a>
-                  <a class="brand" href=".">kpacha</a>
+                  <a class="brand" href="../../..">kpacha</a>
                   <div class="nav-collapse collapse">
                     <ul class="nav">
-                                                                                                            <li><a href="about.html">About me</a></li>
-                                                            <li><a href="archive.html">Archive</a></li>
-                                                            <li><a href="contributions.html">Contributions</a></li>
+                                                                                                            <li><a href="../../../about.html">About me</a></li>
+                                                            <li><a href="../../../archive.html">Archive</a></li>
+                                                            <li><a href="../../../contributions.html">Contributions</a></li>
                                                                                                 </ul>
                                       </div>
               </div>
@@ -54,18 +54,17 @@
                   <div class="row">
             <div class="span10 offset1 content">
                                                 <div class="page-header">
-                    <h1>Blogging <small>for fun and profit</small></h1>
+                    <h1>Solving sudokus with scala streams</h1>
                   </div>
                               
-              <p>    <h2>
-        <a href="2014/10/26/solving-sudoku-puzzles-with-scala-streams.html">
-            Solving sudoku puzzles with scala streams
-        </a>
-        <small>
-            Oct 26
-                    </small>
-    </h2>
-    <p>Scala has a very nice lazy evaluation system, allowing you to defer a lot of evaluations to the last moment. This is a nice to have feature when you are dealing with 'almost-infinite' lists. There are some examples on the web but I wanted bigger trees to explore in order to see it working, so I went to sudoku.</p>
+                <article>
+    <div class="pull-right date">
+      <i class="icon-calendar"></i>
+      Oct 26th, 2014
+    </div>
+
+    <div class="body">
+      <p>Scala has a very nice lazy evaluation system, allowing you to defer a lot of evaluations to the last moment. This is a nice to have feature when you are dealing with 'almost-infinite' lists. There are some examples on the web but I wanted bigger trees to explore in order to see it working, so I went to sudoku.</p>
 
 <h2 id="board-basics">Board basics<a href="#board-basics" class="anchor">#</a></h2>
 
@@ -165,7 +164,7 @@ def box(pos: Position): List[Char] = {
 <pre><code>def steps(game: String): Stream[Board] = from(Stream(build(game)))
 </code></pre>
 
-<p>The last function we must implement is the one that filters the <code>Stream</code> looking for a solved board. That is why we created the <code>isDone</code> val.</p>
+<p>The last function we must implement is the one responsible for filtering the <code>Stream</code> looking for a solved board. That is why we created the <code>isDone</code> val.</p>
 
 <pre><code>def solve(game: String): Board = steps(game).filter(_.isDone).head
 </code></pre>
@@ -197,22 +196,26 @@ class Board(val game: String) {
 </code></pre>
 
 <p>The complete code is availbe as a <a href="https://gist.github.com/kpacha/adeda0bd7a08076d67d0">gist</a>;</p>
-</p>
+    </div>
 
-<h2 id="older-blog-posts">Older blog posts<a href="#older-blog-posts" class="anchor">#</a></h2>
-
-<p><ul class="unstyled" style="padding-left:30px"><li class=""><h5><a href="2014/10/19/creating-your-sdk-for-suricate.html"><i class="icon-book"></i>
-                                Creating your sdk for suricate
-                                <small>(2014-10-19)</small></a></h5></li><li class=""><h5><a href="2014/10/18/discovering-your-services-with-zookeeper.html"><i class="icon-book"></i>
-                                Discovering your services with zookeeper
-                                <small>(2014-10-18)</small></a></h5></li><li class=""><h5><a href="2014/02/14/improving-the-css-js-compression-process.html"><i class="icon-book"></i>
-                                Improving the css/js compression process
-                                <small>(2014-02-14)</small></a></h5></li><li class=""><h5><a href="2014/01/12/building-a-simple-static-blog-with-carew.html"><i class="icon-book"></i>
-                                Building a simple static blog with carew
-                                <small>(2014-01-12)</small></a></h5></li></ul></p>            </div>
+          <hr>
+      <h4>Tags:</h4>
+      <ul class="tag_box inline">
+                  <li>
+            <a href="../../../tags/scala.html">Scala</a>
+          </li>
+                  <li>
+            <a href="../../../tags/streams.html">Streams</a>
+          </li>
+                  <li>
+            <a href="../../../tags/sudoku.html">Sudoku</a>
+          </li>
+              </ul>
+      </article>
+            </div>
           </div>
         
-                  <footer>
+                          <footer>
             <p>
               &copy;
                               <a href="about.html">
@@ -224,13 +227,15 @@ class Board(val game: String) {
               </small>
             </p>
           </footer>
-              </div>
+        
+      </div>
     
     
-          <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-      <script>window.jQuery || document.write('<script src="./js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
-      <script src="./js/vendor/bootstrap.min.js"></script>
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../../../js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+      <script src="../../../js/vendor/bootstrap.min.js"></script>
       <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
       <script>hljs.initHighlightingOnLoad();</script>
+    
       </body>
 </html>

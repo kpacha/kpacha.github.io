@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Improving the css/js compression process</title>
+
+    <meta name="description" content="Hacking around">
+    <meta name="author" content="kpacha">
+    <meta name="viewport" content="width=device-width">
+
+    
+    <link rel="canonical" href="http://kpacha.github.io/2014/02/14/improving-the-css-js-compression-process.html"/>
+              <link rel="alternate" href="http://kpacha.github.io/feed/atom.xml" type="application/atom+xml" title="kpacha"/>
+      
+        <link rel="stylesheet" href="../../../css/bootstrap.min.css"><link rel="stylesheet" href="../../../css/bootstrap-responsive.min.css"><link rel="stylesheet" href="../../../css/main.css"><link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/pojoaque.min.css">    
+    <script src="../../../js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+  </head>
+
+  <body>
+    <!--[if lt IE 7]>
+        <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    
+          <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+              <div class="container">
+                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                  </a>
+                  <a class="brand" href="../../..">kpacha</a>
+                  <div class="nav-collapse collapse">
+                    <ul class="nav">
+                                                                                                            <li><a href="../../../about.html">About me</a></li>
+                                                            <li><a href="../../../archive.html">Archive</a></li>
+                                                            <li><a href="../../../contributions.html">Contributions</a></li>
+                                                                                                </ul>
+                                      </div>
+              </div>
+          </div>
+      </div>
+    
+    
+          <div class="container">
+
+        
+                  <div class="row">
+            <div class="span10 offset1 content">
+                                                <div class="page-header">
+                    <h1>Improving the css/js compression process</h1>
+                  </div>
+                              
+                <article>
+    <div class="pull-right date">
+      <i class="icon-calendar"></i>
+      Feb 14th, 2014
+    </div>
+
+    <div class="body">
+      <p>Everybody in the web business knows that deploying uncompressed css/js files is a bad idea. It is a waste of time and money since storage and bandwith usually are not free resources (this web is a clear exception, so here I do not care too much). And the website will take more time to get fully rendered. So people use tools like <a href="http://yui.github.io/yuicompressor/">yui-compressor</a> in order to minify their css and javascript files. But adding those compressed files to the SCM tool does not feel right because there is no way to know if the compressed files are up to date with the uncompressed version. The solution is compress those files just before deploying a new version.</p>
+
+<p>This aproach is fine if you are deploying a pre-builded package to your servers. But, what if you are just checking out the code from your SCM? In this scenario, you will need to install your compressing tool (with all its requirements) in every server and trigger the compression process after the checkout. Why would you spend so much time doing the same operation again and again? Are your files different from one host to another or are they almost the same? How often do you deploy? Just take the DRY pattern to the next abstraction level and delegate that process to a dedicated service!</p>
+
+<p>Here <a href="http://kpacha.github.io/yuicompressor-server/">yuicompressor-server</a> comes up. Since yui-compressor is the most adopted compression tool and since it is a FOSS java project, it sounds good to me to bundle the jar with a lightweight http service and centralize the locally installed compression tool in a dedicated server. This solution gives some extra benefits:</p>
+
+<ul><li><em>Less software requirements on the app servers</em>. If they are running a pure php-based app, why should they require a jdk?</li>
+<li><em>More resource reutilization</em> since you are instantiating less compressors... And there is a single jvm in a dedicated and customized server!</li>
+<li><em>Fault tolerance</em>. Just launch a set of yuicompressor-server hosts and add them to your deployment process. This HA configuration removes any SPOF (single point of failure) and improves the service continuation because the probability of unsuccesful deployments due errors (related to the compression processes and results) is almost zero.</li>
+<li><em>Cachable responses for free</em>. It is a http service so you can use the cache headers and any network intermediary will cache your responses. Also, you can place a front-end cache (dedicated or embedded) and reduce the response time and server load. <a href="https://www.varnish-cache.org/">Varnish</a> and <a href="http://ehcache.org/">Ehcache</a> are your friends... but are you really generating so much requests?</li>
+</ul><p>Finally, you will end with a faster deployment process and an easier infraestructure.</p>
+
+<p>For the http service, I choose an embedded <a href="http://www.eclipse.org/jetty/">jetty</a>. I discovered it some time ago playing with the <a href="http://www.ninjaframework.org/">ninja framework</a> and I love it. It gets a well tested, very stable and pretty fast http server. And it is as easy to use that it requires just few lines of code to get it running!</p>
+
+<p>The yuicompressor-server is not the best solution but it is the next baby-step in the continuous improvement process. It is the small hop you make to get things running better without any big, risky change. Some day in the future, your CI server will handle the css/js compression task before packaging a release and deploy it. Then, after celebrating your new achivement in the long road to the perfect processes and the leanest environment, you will be able to shutdown your compressor server and forget it. Until that happy day, why should you be doing nothing to improve your daily work?</p>
+
+<p>Read more about <a href="http://kpacha.github.io/yuicompressor-server/">yuicompressor-server</a> or inspect the <a href="http://github.com/kpacha/yuicompressor-server/">code</a></p>
+    </div>
+
+          <hr>
+      <h4>Tags:</h4>
+      <ul class="tag_box inline">
+                  <li>
+            <a href="../../../tags/php.html">Php</a>
+          </li>
+                  <li>
+            <a href="../../../tags/java.html">Java</a>
+          </li>
+                  <li>
+            <a href="../../../tags/yui-compressor.html">Yui-Compressor</a>
+          </li>
+                  <li>
+            <a href="../../../tags/jetty.html">Jetty</a>
+          </li>
+              </ul>
+      </article>
+            </div>
+          </div>
+        
+                          <footer>
+            <p>
+              &copy;
+                              <a href="about.html">
+                  kpacha
+                </a>
+                            2014
+              <small>
+                with help from <a href="http://carew.github.com/" target="_blank">Carew</a>
+              </small>
+            </p>
+          </footer>
+        
+      </div>
+    
+    
+              <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../../../js/vendor/jquery-1.9.0.min.js"><\/script>')</script>
+      <script src="../../../js/vendor/bootstrap.min.js"></script>
+      <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+      </body>
+</html>
