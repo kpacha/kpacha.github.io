@@ -5,7 +5,7 @@
     <link href="http://kpacha.github.io/feed/index.atom" rel="self" />
     <link href="http://kpacha.github.io/" />
         <id>http://kpacha.github.io/</id>
-            <updated>2014-10-19T00:00:00+02:00</updated>
+            <updated>2014-10-26T00:00:00+02:00</updated>
             <entry>
         <title>Building a simple static blog with carew</title>
                 <id>http://kpacha.github.io/2014/01/12/building-a-simple-static-blog-with-carew.html</id>
@@ -470,7 +470,7 @@ INFO: Initiating Jersey application, version 'Jersey: 1.11 12/09/2011 10:27 AM'
 
 <p>The rest interface is defined in the homepage of the <a href="https://github.com/kpacha/suricate#usage">suricate project</a>.</p>
 
-<p>TLTR? here goes the short version:</p>
+<p>TLDR? here goes the short version:</p>
 
 <pre><code># Register the host 'ca2fff8e-d756-480c-b59e-8297ff88624b' in the cluster 'test'
 $ curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X PUT -d '{"name": "test", "id": "ca2fff8e-d756-480c-b59e-8297ff88624b", "address": "10.20.30.40", "port": 1234, "payload": "supu", "registrationTimeUTC": 1325129459728, "serviceType": "STATIC"}' http://localhost:8080/v1/service/test/ca2fff8e-d756-480c-b59e-8297ff88624b
@@ -588,5 +588,147 @@ $success = $client-&gt;removeService($serviceName, $nodeId);
 <p>The <a href="https://github.com/kpacha/suricate-php-sdk">suricate-php-sdk</a> also offers a set of commands to interact to de REST server through the CLI.</p>
 
 <p>Coming soon: getting more from the sdk and integrating the service discovering with your local configuration</p>]]></content>
+    </entry>
+        <entry>
+        <title>Solving sudoku puzzles with scala streams</title>
+                <id>http://kpacha.github.io/2014/10/26/solving-sudoku-puzzles-with-scala-streams.html</id>
+                <updated>2014-10-26T00:00:00+02:00</updated>
+        <author>
+            <name>kpacha</name>
+            <email>kpacha666@gmail.com</email>
+        </author>
+        <link rel="alternate" type="text/html" href="http://kpacha.github.io/2014/10/26/solving-sudoku-puzzles-with-scala-streams.html"/>
+        <content type="html" xml:lang="en"><![CDATA[<p>Scala has a very nice lazy evaluation system, allowing you to defer a lot of evaluations to the last moment. This is a nice to have feature when you are dealing with 'almost-infinite' lists. There are some examples on the web but I wanted bigger trees to explore in order to see it working, so I went to sudoku.</p>
+
+<h2 id="board-basics">Board basics<a href="#board-basics" class="anchor">#</a></h2>
+
+<p>Before going any further on the solving algorithm, we need to define some values and types</p>
+
+<pre><code>type Position = (Int, Int)              // the type to handle pairs of coordinates
+val EmptyValue = '0'                    // the char representing the empty cells
+val MaxValue = 9                        // the number of columns and rows
+
+val allValues = "123456789".toList      // the list of all possible values of a cell
+val indexes = (0 to 8).toList           // the list of column and row indexes
+</code></pre>
+
+<p>Now we can go with the <code>Board</code> class. This will be responsible for parsing the game and generate a list of the next possible 'movements'. First of all, let's look at the object initialization phase</p>
+
+<pre><code>class Board(val game: String) {
+    val empty = game indexOf EmptyValue
+    val emptyPosition = (empty % MaxValue, empty / MaxValue)
+    val isDone = empty == -1
+
+    ...
+}
+</code></pre>
+
+<p>Here we see that Board has a constructor param called <code>game</code>. On the object instantiation, it calculates the first empty position in the board. It also checks if the board is completed (when there are no more empty cells, we can assume the game is done).</p>
+
+<p>Encapsulating the base info in a string allows us to manipulate it easily. It also allows us to override the <code>toString</code> method so the board will be displayed in a more human friendly way.</p>
+
+<pre><code>override def toString: String = "\n" + (game sliding (MaxValue, MaxValue) mkString "\n")
+</code></pre>
+
+<p>Since our <code>Board</code> is based on a string definition of the game, we can add a function to create a new updated object with the same signature the <code>String</code> class exposes, so updating the <code>Board</code> will be as intuitive as updating the string that defines the object itself.</p>
+
+<pre><code>def updated(pos: Int, value: Char): Board = new Board(game updated (pos, value))
+</code></pre>
+
+<p>The <code>Board</code> class must include some accessors to the cells it contains, so we must implement some getters by row, column and box (here, I'm calling each 3x3 block a box).</p>
+
+<pre><code>def row(y: Int): List[Char] = indexes map (col =&gt; game(y * MaxValue + col))
+def col(x: Int): List[Char] = indexes map (row =&gt; game(x + row * MaxValue))
+def box(pos: Position): List[Char] = {
+  def base(p: Int): Int = (p / 3) * 3
+
+  val x0 = base(pos._1)
+  val y0 = base(pos._2)
+  val ys = (y0 until y0 + 3).toList
+  (x0 until x0 + 3).toList.flatMap(x =&gt; ys.map(y =&gt; game(x + y * MaxValue)))
+}
+</code></pre>
+
+<p>As you can see, in order to get the values of a row or a column we just map the indexes <code>[0,8]</code> with the corresponding values of the game. Getting the box values is more complex because the boundaries of the box must be calculated before extracting the values of the game.</p>
+
+<h2 id="next-candidates">Next candidates<a href="#next-candidates" class="anchor">#</a></h2>
+
+<p>The easiest way to get a list of all possible values of a cell is to join all the values already placed in the same row, column and box. So we need a function to calculate the values a cell should not contain</p>
+
+<pre><code>def toAvoid(pos: Position): List[Char] = (col(pos._1) ++ row(pos._2) ++ box(pos)).distinct
+</code></pre>
+
+<p>and then, get the values not included in the <code>toAvoid</code> list</p>
+
+<pre><code>def candidates(pos: Position): List[Char] = allValues diff toAvoid(pos)
+</code></pre>
+
+<p>It is interesting to note that if there is not a single candidate, it will return an empty list.</p>
+
+<p>The main objectives of the <code>Board</code> class was to encapsulate the game info and generate a list of the next possible movements. The first part is done. Let's finish the other one with the <code>next</code> function. Here we want to create a new <code>Board</code> for each candidate it found but we want to defer they evaluation until the last moment. So, now is when <a href="http://www.scala-lang.org/api/2.11.2/index.html#scala.collection.immutable.Stream">streams</a> come to the rescue. A <code>Stream</code> defers the evaluation of the second param until it is required. By returning a <code>Stream[Board]</code> we avoid to instantiate every possible candidate until the code needs the next one to check if the game is finished or to ask for the next candidates.</p>
+
+<pre><code>def next: Stream[Board] = candidates(emptyPosition).toStream map (c =&gt; updated(empty, c))
+</code></pre>
+
+<p>When it returns an empty <code>Stream</code>, you are done or you have some cell(s) wrong. Anyway, that is the way you know the path is finished.</p>
+
+<p>At this moment, we are done with our <code>Board</code> class. Hurray!</p>
+
+<h2 id="the-solver">The solver<a href="#the-solver" class="anchor">#</a></h2>
+
+<p>Our <code>Sudoku</code> solver has to expose a board builder that instantiates our initial <code>Board</code>. Very straightforward task.</p>
+
+<pre><code>def build(game: String): Board = new Board(game)
+</code></pre>
+
+<p>Time to create an almost infinite list of possible boards. We want to explore the tree efficiently, so we will use a breadth-first traversal algorithm. First, we emit the head, then we add its subnodes to the end of the list of nodes to explore and move to the next node of the level. When all the nodes in a level are checked, we move to the next one by inspecting the children of the first node of the already completed level.</p>
+
+<p>Note we need to accept a list of boards in order to make the function recursive. This function will get the <code>head</code> of the <code>Stream</code> and then it will create a new <code>Stream</code> with that item and the result of the recursive call. The <code>Stream</code> passed to that recursive call is just the concatenation of the <code>tail</code> of the original <code>Stream</code> and the candidates returned by the <code>head</code>. Once the <code>tail</code> and the next candidates are empty, the path is finished.</p>
+
+<pre><code>def from(path: Stream[Board]): Stream[Board] = path match {
+    case h #:: t =&gt; h #:: from(t ++ h.next)
+    case _ =&gt; Stream.empty
+}
+</code></pre>
+
+<p>Due the way our <code>Board</code> class generates the candidate <code>Stream</code>, we can assume our list will contain just valid boards, mostly incomplete.</p>
+
+<p>Now we have a builder and a candidate generator, we can put it together and generate a <code>Stream</code> of valid boards starting from the received game definition string.</p>
+
+<pre><code>def steps(game: String): Stream[Board] = from(Stream(build(game)))
+</code></pre>
+
+<p>The last function we must implement is the one that filters the <code>Stream</code> looking for a solved board. That is why we created the <code>isDone</code> val.</p>
+
+<pre><code>def solve(game: String): Board = steps(game).filter(_.isDone).head
+</code></pre>
+
+<p>And we are done! Our solver will just evaluate the minimun steps required to get the first solved board.</p>
+
+<h2 id="further-optimizations">Further optimizations<a href="#further-optimizations" class="anchor">#</a></h2>
+
+<p>In order to avoid some repetitive calculations, it is possible to create a map with the positions a box contains out of the <code>Board</code> class and change the <code>box</code> function to get it filtering the game values with the precalculated map.</p>
+
+<pre><code>val boxCoordinates = (0 to 2).toList
+
+def box(pos: Int): List[Int] = {
+    def base(p: Int): Int = (p / 3) * 3
+
+    val x0 = base(getX(pos))
+    val y0 = base(getY(pos))
+    val ys = (y0 until y0 + 3).toList
+    (x0 until x0 + 3).toList.flatMap(x =&gt; ys.map(x + _ * 9))
+}
+
+val boxes = boxCoordinates flatMap (x =&gt; boxCoordinates map (x * 3 + _ * 3 * 9)) map box
+
+class Board(val game: String) {
+    ...
+    def box(pos: Int): List[Char] = (boxes filter (_ contains pos)).head map game
+    ...
+}
+</code></pre>
+
+<p>The complete code is availbe as a <a href="https://gist.github.com/kpacha/adeda0bd7a08076d67d0">gist</a>;</p>]]></content>
     </entry>
     </feed>
